@@ -1,0 +1,168 @@
+.container {gap: 2%;}
+
+/* ================== 검색 영역 ================== */
+.search-container {
+    width: 92%;
+    height: 9%;
+    margin-top: 6%;
+
+    display: flex;
+    align-content: center;
+    justify-content: center;
+
+    border: 1px solid gray;
+}
+
+.search-date,
+.search-category,
+.search-keywords {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#startDate,
+#endDate,
+.keywords-box{
+    height: 40%;
+}
+
+.select-box {
+    height: 44%;
+}
+
+.search-date {
+    width: 35%;
+    margin-right: 2%;
+}
+
+.search-category {
+    width: 13%;
+}
+
+.select-box {
+    width: 90%;
+    padding-left: 5%;
+}
+
+.search-keywords {
+    width: 33%;
+    margin-right: 2%;
+}
+
+#startDate,
+#endDate {
+    width: 33%;
+    text-align: center;
+}
+
+#startDate {
+    margin-left: 19px;
+    margin-right: 9px;
+}
+
+#endDate {
+    margin: 0 9px;
+}
+
+.keywords-box {
+    width: 96%;
+    padding-left: 3%;
+}
+
+.keywords-box::placeholder {
+    text-align: center;
+}
+
+.button-box {
+    display: flex;
+    align-items: center;
+}
+
+.search-button {
+    height: 30px;
+    width: 76px;
+}
+
+/* 전체 게시물 */
+.total-posts {
+    width: 98%;
+    margin-top: 2%;
+    text-align: left;
+}
+
+/* ================== 게시물 영역 ================== */
+.tableLine1 {
+    height: 1px;
+    background-color: black;
+    border: none;
+    width: 98%;
+    margin: 0;
+}
+
+.tableLine2 {
+    height: 1px;
+    background-color: lightgray;
+    border: none;
+    width: 98%;
+    margin: 0;
+}
+
+.posts-container {
+    width: 100%;
+    height: 68%;
+    min-height: 440px;
+    margin-bottom: 50px;
+}
+
+.posts-title,
+.posts-item,
+.pages {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    height: 35px;
+}
+
+.posts-title {
+    margin: 3px 0;
+    font-weight: bold;
+}
+
+.new-post {
+    display: flex;
+    justify-content: end;
+    margin-right: 20px;
+}
+
+.post-category {width: 9%;}
+.post-files {width: 4%;}
+.post-title {width: 42%; text-align: left;}
+.post-writer {width: 8%;}
+.post-views {width: 8%;}
+.post-created {width: 12%;}
+.post-updated {width: 12%;}
+
+.clip-img {
+    height: 14px;
+    width: auto;
+    margin-left: 10%;
+}
+
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ================== 페이지 영역 ================== */
+.pages { margin-top: 7px; }
+.pages a { display: inline-block; margin: 0 8px; user-select: none; cursor: pointer; }
+.pages a.active { pointer-events: none; cursor: default; font-weight: bold; color: orange; }
+
+
+.post-submit-button {
+    height: 34px;
+    width: 90px;
+}

@@ -1,0 +1,131 @@
+
+<form action="/board/update" method="POST" id="updateForm" enctype="multipart/form-data" class="container">
+    <hr class="line">
+    <div class="category-container">
+        <div class="subject-container">
+            <span class="subject-item">카테고리*</span>
+        </div>
+        <div class="input-container">
+            <select name="categoryId" id="category" class="category">
+                <c:forEach var="category" items="${categories}">
+                    <option value='<c:out value="${category.id}" />'
+                    <c:if test='${category.name == post.categoryName}'>selected</c:if>
+                    ><c:out value='${category.name}' /></option>
+                </c:forEach>
+            </select>
+        </div>
+    </div>
+
+    <hr class="line">
+    <div class="writer-container">
+        <div class="subject-container">
+            <span class="subject-item">등록 일시</span>
+        </div>
+        <div class="input-container">
+            <span class="font13"><c:out value='${post.createdAt}' /></span>
+        </div>
+    </div>
+    <hr class="line">
+
+    <div class="writer-container">
+        <div class="subject-container">
+            <span class="subject-item">수정 일시</span>
+        </div>
+        <div class="input-container">
+            <span class="font13">
+            <c:choose>
+                <c:when test="${post.updatedAt != null}">
+                    <c:out value='${post.updatedAt}' />
+                </c:when>
+                <c:otherwise>
+                    -
+                </c:otherwise>
+            </c:choose>
+            </span>
+        </div>
+    </div>
+    <hr class="line">
+
+    <div class="writer-container">
+        <div class="subject-container">
+            <span class="subject-item">조회수</span>
+        </div>
+        <div class="input-container">
+            <span class="font13"><c:out value='${post.views}' /></span>
+        </div>
+    </div>
+    <hr class="line">
+
+    <div class="writer-container">
+        <div class="subject-container">
+            <span class="subject-item">작성자*</span>
+        </div>
+        <div class="input-container">
+            <input type="text" name="writer" class="writer" value="${post.writer}" required>
+        </div>
+    </div>
+    <hr class="line">
+
+    <div class="password-container">
+        <div class="subject-container">
+            <span class="subject-item">비밀번호*</span>
+        </div>
+        <div class="password-input-container">
+            <input type="password" name="password" id="password" class="password"
+                   placeholder="비밀번호">
+        </div>
+    </div>
+    <hr class="line">
+
+    <div class="title-container">
+        <div class="subject-container">
+            <span class="subject-item">제목*</span>
+        </div>
+        <div class="input-container">
+            <input type="text" name="title" id="title" class="title" value="${post.title}">
+        </div>
+    </div>
+    <hr class="line">
+
+    <div class="content-container">
+        <div class="subject-container">
+            <span class="subject-item">내용*</span>
+        </div>
+        <div class="input-container">
+            <textarea name="content" id="content" class="content"><c:out value="${post.content}"/></textarea>
+        </div>
+    </div>
+    <hr class="line">
+
+    <div class="files-container">
+        <div class="subject-container">
+            <span class="subject-item">파일 첨부</span>
+        </div>
+        <div class="file-upload-container">
+            <c:forEach var="file" items="${files}">
+                <div class="file-item previous-file-list">
+                    <span><c:out value="${file.fileName}" /></span>
+                    <input type="hidden" name="deleteFileId">
+                    <button class="file-button" type="button"
+                            onclick="removePreviousFile(this, '<c:out value="${file.id}"/>')">x
+                    </button>
+                </div>
+            </c:forEach>
+            <div id="fileNameList" class="file-item file-list">
+
+            </div>
+            <div class="file-item">
+                <input type="file" name="files" class="file-name" onchange="showChooseFiles(this)">
+            </div>
+        </div>
+    </div>
+    <hr class="line">
+
+    <span id="warnAlert" class="warning-alert"></span>
+
+    <div class="button-container">
+        <input type="hidden" name="id" value="${post.id}">
+        <button type="button" onclick="cancelForm()">취소</button>
+        <button type="submit" onclick="submitForm()">저장</button>
+    </div>
+</form>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>NEW</title>
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/postForm.css}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+
+<form th:action="@{/post}" method="POST" id="insertForm" enctype="multipart/form-data" class="container">
+    <hr class="line">
+
+    <div class="category-container">
+        <div class="subject-container">
+            <span class="subject-item">카테고리 <span style="color: red;">*</span></span>
+        </div>
+        <div class="input-container">
+            <select name="categoryId" id="category" class="category font14">
+                <option value="0" selected>카테고리 선택</option>
+                <option th:each="category : ${categories}"
+                        th:value="${category.id}"
+                        th:text="${category.name}"></option>
+            </select>
+        </div>
+    </div>
+    <hr class="line">
+
+    <div class="writer-container">
+        <div class="subject-container">
+            <span class="subject-item">작성자 <span style="color: red;">*</span></span>
+        </div>
+        <div class="input-container">
+            <input type="text" id="writer" name="writer" class="writer font14">
+        </div>
+    </div>
+    <hr class="line">
+
+    <div class="password-container">
+        <div class="subject-container">
+            <span class="subject-item">비밀번호 <span style="color: red;">*</span></span>
+        </div>
+        <div class="password-input-container">
+            <input type="password" name="password" id="password" class="password font14" placeholder="비밀번호">
+            <input type="password" name="passwordConfirm" id="passwordConfirm" class="password font14" placeholder="비밀번호 확인">
+        </div>
+    </div>
+    <hr class="line">
+
+    <div class="title-container">
+        <div class="subject-container">
+            <span class="subject-item">제목 <span style="color: red;">*</span></span>
+        </div>
+        <div class="input-container">
+            <input type="text" name="title" id="title" class="title font14" placeholder="제목을 입력해주세요.">
+        </div>
+    </div>
+    <hr class="line">
+
+    <div class="content-container">
+        <div class="subject-container">
+            <span class="subject-item">내용 <span style="color: red;">*</span></span>
+        </div>
+        <div class="input-container">
+            <textarea name="content" id="content" class="content font13" placeholder="내용을 입력해주세요."></textarea>
+        </div>
+    </div>
+    <hr class="line">
+
+    <div class="files-container">
+        <div class="subject-container">
+            <span class="subject-item">파일 첨부</span>
+        </div>
+        <div class="file-upload-container">
+            <div>
+                <div id="fileNameList" class="file-item"></div>
+
+                <div class="file-item">
+                    <input type="file" name="files" class="file-name" onchange="showChooseFiles(this)">
+                </div>
+            </div>
+            <span class="file-notice font13">※ 100MB 이하의 파일만 업로드 가능합니다.</span>
+        </div>
+    </div>
+    <hr class="line">
+
+    <!-- 입력 조건 안내 영역 -->
+    <div class="alertArea font14">
+        <span id="warnAlert" style="color: red;">제목은 어쩌구 저쩌구 입력해주세여</span>
+    </div>
+
+    <div class="button-container">
+        <button type="button" id="cancelBtn" onclick="cancelInsert()">취소</button>
+        <button type="button" id="submitBtn" onclick="submit()">저장</button>
+    </div>
+</form>
+
+
+<script>
+
+
+    /**
+     * 작성을 취소하고 게시글 목록으로 이동하는 함수입니다.
+     */
+    function cancelInsert() {
+        location.href = "/posts";
+    }
+
+
+    function submitInsert() {
+    }
+
+
+    /**
+     * 선택한 첨부파일을 동적으로 컨트롤 할 수 있는 함수입니다.
+     * 1. 선택한 파일을 보여줄 div(span, button) 영역 생성
+     * 1-1. 선택한 파일을 취소시 해당 파일의 input 을 disable 처리
+     * 2. 첨부파일을 선택한 div 영역 hidden 처리
+     * 3. 새로운 첨부파일 div(input) 영역 생성
+     * 크게 세가지 기능이 있습니다.
+     */
+    function showChooseFiles(input) {
+
+        // 선택된 파일들을 표시할 컨테이너
+        const files = document.getElementById('fileNameList');
+
+        if (input.files.length > 0) {
+
+            const chooseFileDiv = document.createElement('div');
+            chooseFileDiv.classList.add('selected');
+
+            const fileNameSpan = document.createElement('span');
+            fileNameSpan.textContent = input.files[0].name;
+
+            const removeButton = document.createElement('button');
+            removeButton.textContent = '✖';
+            // x 버튼 클릭 → 선택한 <input type="file"> 을 disable /
+            removeButton.onclick = function() {
+                files.removeChild(chooseFileDiv);
+                input.disabled = true;
+            };
+
+            chooseFileDiv.appendChild(fileNameSpan);
+            chooseFileDiv.appendChild(removeButton);
+            files.appendChild(chooseFileDiv);
+
+            // 현재 <input type="file"> 의 부모 div 를 숨김
+            input.closest('.file-item').style.display = 'none';
+
+            // 새로운 <input type="file"> 을 위한 div 생성 및 삽입
+            const newFileItemDiv = document.createElement('div');
+            newFileItemDiv.classList.add('file-item');
+
+            const newFileInput = document.createElement('input');
+            newFileInput.type = 'file';
+            newFileInput.name = 'files';
+            newFileInput.classList.add('file-name');
+            newFileInput.onchange = function() {
+                showChooseFiles(newFileInput);
+            };
+
+            newFileItemDiv.appendChild(newFileInput);
+            files.parentElement.appendChild(newFileItemDiv);
+        }
+    }
+
+
+    /**
+     * 작성한 게시물의 유효성을 검증하고 저장하는 함수입니다.
+     */
+    $().ready(function () {
+
+    });
+
+</script>
+
+</body>
+</html>

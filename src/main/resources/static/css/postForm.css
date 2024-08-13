@@ -1,0 +1,127 @@
+input { height: 26px; padding-left: 7px;}
+select { height: 30px; padding-left: 6px; }
+
+.line {
+    height: 1px;
+    width: 90%;
+    background-color: lightgray;
+    border: none;
+    margin: 0;
+}
+
+.category-container,
+.writer-container,
+.password-container,
+.title-container,
+.content-container,
+.files-container {
+    display: flex;
+    width: 90%;
+    font-size: 16px;
+    font-family: 'Pretendard-Regular';
+    letter-spacing: 0.05em;
+}
+
+.subject-container {
+    width: 15%;
+    background-color: #E2E2E2;
+    display: flex;
+    align-items: center;
+    padding: 1% 1% 1% 2%;
+    box-sizing: border-box;
+}
+
+.subject-item {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.input-container,
+.password-input-container {
+    width: 85%;
+    display: flex;
+    align-items: center;
+    padding: 6px 1%;
+    box-sizing: border-box;
+}
+
+.category {
+    width: 26%;
+}
+
+.password,
+.writer,
+.file-name {
+    width: 26%;
+    margin-right: 1%;
+}
+
+.title,
+.content {
+    width: 100%;
+}
+
+.content {
+    height: 150px;
+    padding: 10px;
+    border: 1px solid;
+    outline: none;
+    resize: none;
+}
+
+/* =================== 파일 영역 ==================== */
+.file-upload-container {
+    width: 85%;
+    display: flex;
+    flex-direction: column;
+    padding: 7px 1%;
+    box-sizing: border-box;
+}
+
+.file-item {
+    padding: 6px 0;
+}
+
+.selected {
+    margin: 1px 0 3px 11px;
+}
+
+.selected span {
+    font-size: 14px;
+}
+
+.selected button {
+    background: none;
+    font-size: 11px;
+    color: gray;
+}
+
+.selected button:hover {
+    color: orange !important;
+}
+
+.file-notice {
+    margin-left: 10px;
+    margin-bottom: 2px;
+    color: gray;
+}
+
+/* =================== 알림 영역 ==================== */
+.alertArea {
+    margin-top: 10px;
+    height: 10px;
+}
+
+/* =================== 버튼 영역 ==================== */
+.button-container {
+    margin-top: 30px;
+    width: 89%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.button-container button {
+    height: 29px;
+    width: 100px;
+    border: none;
+}

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>LIST</title>
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/postList.css}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        /**
+         * 오늘 날짜를 동적으로 받아와서 검색 조건의 시작일과 종료일을 설정합니다.
+         * 시작일은 오늘로 부터 1년 전의 날짜로, 종료일은 오늘 날짜로 초기값을 설정합니다.
+         */
+        $().ready(function() {
+            let defaultStartDate = new Date();
+            let year = defaultStartDate.getFullYear();
+            let month = String(defaultStartDate.getMonth() + 1).padStart(2, '0');
+            let day = String(defaultStartDate.getDate()).padStart(2, '0');
+
+            let today = `${year}-${month}-${day}`;
+            let oneYearAgo = `${year-1}-${month}-${day}`;
+            $("#startDate").val(oneYearAgo);
+            $("#endDate").val(today);
+
+            /**
+             * 시작일 변경 이벤트 핸들러입니다.
+             * 시작 날짜가 종료 날짜보다 뒤에 있지 않도록 검사합니다.
+             * 종료 날짜보다 뒤로 변경될 시, 종료 날짜로 설정됩니다.
+             */
+            $("#startDate").on("change", function () {
+                let startDateValue = $(this).val();
+                let endDateValue = $("#endDate").val();
+
+                if (startDateValue > endDateValue) {
+                    alert("시작날짜 > 종료날짜");
+                    $(this).val(endDateValue);
+                }
+            });
+
+            /**
+             * 종료일 변경 이벤트 핸들러입니다.
+             * 종료 날짜가 오늘 날짜보다 뒤에 있지 않도록 검사합니다.
+             * 오늘 날짜보다 뒤로 변경될 시, 오늘 날짜로 설정됩니다.
+             */
+            $("#endDate").on("change", function () {
+                let endDateValue = $(this).val();
+
+                if (endDateValue > today) {
+                    alert("종료날짜 미래")
+                    $(this).val(today);
+                }
+            });
+
+        });
+
+        /**
+         * 새글 작성 폼으로 이동하는 함수입니다.
+         */
+        function newPost() {
+            location.href = "/newPost";
+        }
+    </script>
+
+</head>
+<body>
+<div class="container">
+
+
+
+    <!-- 검색 container GET /posts -->
+    <form class="search-container" method="GET" th:action="@{/posts}">
+        <div class="search-date">
+            <span class="font15 letter">등록일</span>
+            <input type="date" id="startDate" name="startDate" class="font13"> ~
+            <input type="date" id="endDate" name="endDate" class="font13">
+        </div>
+        <div class="search-category">
+            <select class="select-box font13" name="categoryId">
+                <option value="0" selected>카테고리 선택</option>
+                <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
+            </select>
+        </div>
+        <div class="search-keywords">
+            <input type="text" name="keywords" placeholder="검색어를 입력해 주세요. (제목+작성자+내용)" class="keywords-box font14">
+        </div>
+        <div class="button-box">
+            <button class="search-button font14">검색</button>
+        </div>
+    </form>
+
+
+    <div class="total-posts">
+        <span class="font15 letter">총 <span th:text="${page.totalPostNumber}" style="font-weight: bold"></span>건</span><span></span>
+    </div>
+
+
+
+    <!-- 게시물 container -->
+    <div class="posts-container">
+        <hr class="tableLine2">
+        <div class="posts-title font15">
+            <div class="post-category">카테고리</div>
+            <div class="post-files"></div>
+            <div class="post-title" style="text-align: center;">제목</div>
+            <div class="post-writer">작성자</div>
+            <div class="post-views">조회수</div>
+            <div class="post-created">등록 일시</div>
+            <div class="post-updated">수정 일시</div>
+        </div>
+        <hr class="tableLine1">
+
+        <div th:each="post : ${postList}">
+        <div class="posts-item">
+            <div class="post-category font15" th:text="${post.categoryName}"></div>
+            <div class="post-files">
+                <img th:if="${post.fileExist}" class="clip-img" src="/img/clip.png">
+            </div>
+            <div class="post-title font15 truncate">
+                <a th:href="@{/post(postId=${post.id})}" th:text="${post.title}"></a>
+            </div>
+            <div class="post-writer font15" th:text="${post.writer}"></div>
+            <div class="post-views font14" th:text="${post.views}"></div>
+            <div class="post-created font14" th:text="${post.createdAt}"></div>
+            <div class="post-updated font14">
+                <span th:if="${post.updatedAt != null}" th:text="${post.updatedAt}"></span>
+                <span th:if="${post.updatedAt == null}">-</span>
+            </div>
+        </div>
+        <hr class="tableLine2">
+        </div>
+
+
+
+        <!-- 페이지 container -->
+        <div class="pages">
+            <a th:each="num : ${#numbers.sequence(page.startIndex, page.endIndex)}"
+               th:href="@{/posts(page=${num})}"
+               th:text="${num}"
+               th:classappend="${num == page.currentIndex} ? 'active' : ''"></a>
+        </div>
+
+
+
+        <!-- 버튼 container -->
+        <div class="new-post">
+            <button class="post-submit-button" type="button" onclick="newPost()">등록</button>
+        </div>
+
+    </div>
+
+</div>
+</body>
+</html>

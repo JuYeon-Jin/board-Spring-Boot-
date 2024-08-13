@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ARTICLE</title>
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/postArticle.css}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<div class="container">
+
+    <div class="post-info-container">
+        <div class="title-box font21">
+            [<span th:text="${post.categoryName}"></span>] <span th:text="${post.title}"></span>
+        </div>
+        <div class="etc-info-container font14">
+            <div class="date-box">
+                <div>등록일시 <span th:text="${post.createdAt}"></span></div>
+                <div>수정일시
+                    <span th:if="${post.updatedAt != null}" th:text="${post.updatedAt}"></span>
+                    <span th:if="${post.updatedAt == null}">-</span>
+                </div>
+            </div>
+            <div class="etc-box">
+                <div>작성자 <span th:text="${post.writer}"></span></div>
+                <div>조회수 <span th:text="${post.views}"></span></div>
+            </div>
+        </div>
+    </div>
+    <hr class="tableLine1">
+
+    <div class="content-container font16">
+        <span th:utext="${post.content.replaceAll('\n', '<br>')}" />
+    </div>
+
+
+    <div class="files-container">
+        <div th:each="file : ${files}" class="file-box font14">
+            <img class="download-img" src="/img/download.png">
+            <a th:href="@{/download(seq=${file.fileId})}" th:text="${file.fileName}"></a>
+        </div>
+    </div>
+
+    <div class="comment-container">
+        <div class="comment-item">
+            <div class="command-date">2022.03.08 17:20</div>
+            <div class="command-content">댓글입니다.</div>
+        </div>
+        <hr class="tableLine2">
+        <div class="comment-item">
+            <div class="command-date">2022.03.08 17:20</div>
+            <div class="command-content">댓글입니다.2</div>
+        </div>
+        <hr class="tableLine2">
+        <form class="new-comment-box">
+            <textarea class="new-comment">댓글을 입력해주세요</textarea>
+            <button class="comment-submit-button">등록</button>
+        </form>
+    </div>
+    <hr class="tableLine1">
+    <div class="button-container">
+        <button class="button-item" type="button" onclick="navigateTo('/posts')">목록</button>
+        <button class="button-item" type="button" th:onclick="navigateTo('/editPost?postId=[[${post.postId}]]')">수정</button>
+        <button class="button-item" type="button" onclick="deletePost()">삭제</button>
+    </div>
+
+
+<div id="popupDiv">
+    <hr>
+    <form action="" th:method="DELETE">
+        <div>
+            <div>
+                <span>비밀번호 *</span>
+            </div>
+            <div>
+                <input type="password">
+            </div>
+        </div>
+        <div>
+            <button type="button">취소</button>
+            <button type="submit">확인</button>
+        </div>
+    </form>
+    <hr>
+</div>
+
+
+</div>
+
+<script>
+
+    function navigateTo(path) {
+        location.href = path;
+    }
+
+    function deletePost() {
+
+    }
+
+    $().ready(function () {
+
+    });
+
+</script>
+
+</body>
+</html>
