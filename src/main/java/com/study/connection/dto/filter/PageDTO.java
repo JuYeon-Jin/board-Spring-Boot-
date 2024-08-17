@@ -12,8 +12,6 @@ import lombok.Setter;
 public class PageDTO {
     private int startIndex;
     private int endIndex;
-    private int currentIndex;
-    private int startPostNumber;
-    private int endPostNumber;
+    private int currentPage;
     private int totalPostNumber;
 }

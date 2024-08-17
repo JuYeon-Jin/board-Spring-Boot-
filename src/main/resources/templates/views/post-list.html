@@ -18,10 +18,15 @@
             let month = String(defaultStartDate.getMonth() + 1).padStart(2, '0');
             let day = String(defaultStartDate.getDate()).padStart(2, '0');
 
-            let today = `${year}-${month}-${day}`;
             let oneYearAgo = `${year-1}-${month}-${day}`;
-            $("#startDate").val(oneYearAgo);
-            $("#endDate").val(today);
+            if (!$("#startDate").val()) {
+                $("#startDate").val(oneYearAgo);
+            }
+
+            let today = `${year}-${month}-${day}`;
+            if (!$("#endDate").val()) {
+                $("#endDate").val(today);
+            }
 
             /**
              * 시작일 변경 이벤트 핸들러입니다.
@@ -58,7 +63,7 @@
          * 새글 작성 폼으로 이동하는 함수입니다.
          */
         function newPost() {
-            location.href = "/newPost";
+            location.href = "/new-post";
         }
     </script>
 
@@ -69,20 +74,24 @@
 
 
     <!-- 검색 container GET /posts -->
-    <form class="search-container" method="GET" th:action="@{/posts}">
+    <form class="search-container" method="GET" th:action="@{/posts/1}">
         <div class="search-date">
             <span class="font15 letter">등록일</span>
-            <input type="date" id="startDate" name="startDate" class="font13"> ~
-            <input type="date" id="endDate" name="endDate" class="font13">
+            <input type="date" id="startDate" name="startDate" class="font13" th:value="${filter.startDate}"> ~
+            <input type="date" id="endDate" name="endDate" class="font13" th:value="${filter.endDate}">
         </div>
         <div class="search-category">
             <select class="select-box font13" name="categoryId">
                 <option value="0" selected>카테고리 선택</option>
-                <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
+                <option th:each="c : ${categories}"
+                        th:value="${c.categoryId}"
+                        th:text="${c.categoryName}"
+                        th:selected="${c.categoryId == filter.categoryId}"></option>
             </select>
         </div>
         <div class="search-keywords">
-            <input type="text" name="keywords" placeholder="검색어를 입력해 주세요. (제목+작성자+내용)" class="keywords-box font14">
+            <input type="text" name="keyword" class="keywords-box font14"
+                   placeholder="검색어를 입력해 주세요. (제목+작성자+내용)" th:value="${filter.keyword}">
         </div>
         <div class="button-box">
             <button class="search-button font14">검색</button>
@@ -91,7 +100,7 @@
 
 
     <div class="total-posts">
-        <span class="font15 letter">총 <span th:text="${page.totalPostNumber}" style="font-weight: bold"></span>건</span><span></span>
+        <span class="font14 letter">총 <span th:text="${page.totalPostNumber}" style="font-weight: bold"></span>건</span><span></span>
     </div>
 
 
@@ -117,7 +126,18 @@
                 <img th:if="${post.fileExist}" class="clip-img" src="/img/clip.png">
             </div>
             <div class="post-title font15 truncate">
-                <a th:href="@{/post(postId=${post.id})}" th:text="${post.title}"></a>
+
+                <!-- ${parameter} 가 존재하는 경우 -->
+                <a th:if="${parameter != ''}"
+                   th:href="@{'/post/' + ${post.postId} + ${parameter} + '&page=' + ${page.currentPage}}"
+                   th:text="${post.title}"></a>
+
+                <!-- ${parameter} 가 존재하지 않는 경우 -->
+                <a th:if="${parameter == ''}"
+                   th:href="@{'/post/' + ${post.postId} + '?page=' + ${page.currentPage}}"
+                   th:text="${post.title}"></a>
+
+
             </div>
             <div class="post-writer font15" th:text="${post.writer}"></div>
             <div class="post-views font14" th:text="${post.views}"></div>
@@ -129,18 +149,19 @@
         </div>
         <hr class="tableLine2">
         </div>
+        <div th:if="${postList.isEmpty()}" class="emptyList font15">
+            게시물이 존재하지 않습니다.
+        </div>
 
 
 
         <!-- 페이지 container -->
         <div class="pages">
             <a th:each="num : ${#numbers.sequence(page.startIndex, page.endIndex)}"
-               th:href="@{/posts(page=${num})}"
+               th:href="@{'/posts/' + ${num} + ${parameter}}"
                th:text="${num}"
-               th:classappend="${num == page.currentIndex} ? 'active' : ''"></a>
+               th:classappend="${num == page.currentPage} ? 'active' : ''"></a>
         </div>
-
-
 
         <!-- 버튼 container -->
         <div class="new-post">

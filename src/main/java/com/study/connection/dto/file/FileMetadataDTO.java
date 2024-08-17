@@ -9,7 +9,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class FileInfoDTO {
+public class FileMetadataDTO {
     int fileId;
     String fileName;
+    String fileSize;
 }
+// TODO 수정한 DTO

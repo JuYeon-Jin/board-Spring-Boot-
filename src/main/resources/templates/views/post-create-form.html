@@ -19,9 +19,9 @@
         <div class="input-container">
             <select name="categoryId" id="category" class="category font14">
                 <option value="0" selected>카테고리 선택</option>
-                <option th:each="category : ${categories}"
-                        th:value="${category.id}"
-                        th:text="${category.name}"></option>
+                <option th:each="c : ${category}"
+                        th:value="${c.categoryId}"
+                        th:text="${c.categoryName}"></option>
             </select>
         </div>
     </div>
@@ -63,7 +63,7 @@
             <span class="subject-item">내용 <span style="color: red;">*</span></span>
         </div>
         <div class="input-container">
-            <textarea name="content" id="content" class="content font13" placeholder="내용을 입력해주세요."></textarea>
+            <textarea name="content" id="content" class="content font14" placeholder="내용을 입력해주세요."></textarea>
         </div>
     </div>
     <hr class="line">

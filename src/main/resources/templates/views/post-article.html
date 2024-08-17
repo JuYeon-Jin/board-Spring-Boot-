@@ -31,6 +31,7 @@
     <hr class="tableLine1">
 
     <div class="content-container font16">
+        <!-- 스크립트 영역 작성해서 넣어보기  -->
         <span th:utext="${post.content.replaceAll('\n', '<br>')}" />
     </div>
 
@@ -53,39 +54,39 @@
             <div class="command-content">댓글입니다.2</div>
         </div>
         <hr class="tableLine2">
-        <form class="new-comment-box">
-            <textarea class="new-comment">댓글을 입력해주세요</textarea>
-            <button class="comment-submit-button">등록</button>
+        <form action="/reply" method="POST" class="new-comment-box">
+            <input type="hidden" name="postId" th:value="${post.postId}">
+            <textarea class="new-comment" name="content" placeholder="댓글을 입력해주세요."></textarea>
+            <button class="comment-submit-button" type="submit">등록</button>
         </form>
     </div>
     <hr class="tableLine1">
     <div class="button-container">
         <button class="button-item" type="button" onclick="navigateTo('/posts')">목록</button>
-        <button class="button-item" type="button" th:onclick="navigateTo('/editPost?postId=[[${post.postId}]]')">수정</button>
-        <button class="button-item" type="button" onclick="deletePost()">삭제</button>
+        <button class="button-item" type="button" th:onclick="navigateTo('/edit-post?postId=[[${post.postId}]]')">수정</button>
+        <button class="button-item" type="button" onclick="popup()">삭제</button>
     </div>
 
+</div>
 
-<div id="popupDiv">
-    <hr>
-    <form action="" th:method="DELETE">
-        <div>
-            <div>
-                <span>비밀번호 *</span>
+<div id="popupBackground" style="display: none;"></div>
+<div id="popupDiv" style="display: none;">
+    <form th:action="@{/post}" th:method="DELETE" class="popup-container">
+        <hr class="popup-line">
+        <div class="popup-input-box">
+            <div class="popup-title font13">
+                <span>비밀번호 <span style="color: red;">*</span></span>
             </div>
-            <div>
-                <input type="password">
-            </div>
+            <input type="hidden" name="postId" th:value="${post.postId}">
+            <input type="password" name="password" class="popup-input font12" placeholder="비밀번호를 입력해 주세요.">
         </div>
-        <div>
-            <button type="button">취소</button>
+        <hr class="popup-line">
+
+        <div class="popup-btn-box">
+            <button type="button" onclick="closePopup()">취소</button>
             <button type="submit">확인</button>
         </div>
     </form>
-    <hr>
-</div>
-
-
 </div>
 
 <script>
@@ -94,8 +95,18 @@
         location.href = path;
     }
 
-    function deletePost() {
+    function popup() {
+        const popupDiv = document.getElementById('popupDiv');
+        const popupBackground = document.getElementById('popupBackground');
+        popupDiv.style.display = 'block';
+        popupBackground.style.display = 'block';
+    }
 
+    function closePopup() {
+        const popupDiv = document.getElementById('popupDiv');
+        const popupBackground = document.getElementById('popupBackground');
+        popupDiv.style.display = 'none';
+        popupBackground.style.display = 'none';
     }
 
     $().ready(function () {

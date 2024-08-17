@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ERROR</title>
+</head>
+<body>
+
+에러페이지
+<p style="color: red;">
+    <span th:if="${errorMessage != null}" th:text="${errorMessage}"></span>
+</p>
+
+</body>
+</html>

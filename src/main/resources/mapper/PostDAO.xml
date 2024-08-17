@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.study.connection.dao.PostDAO">
+
+
+    <!-- 공통 조건을 정의한 sql 엘리먼트 -->
+    <sql id="condition">
+        <if test="startDate != null and endDate != null and startDate != '' and endDate != ''">
+            WHERE p.created_at BETWEEN STR_TO_DATE(#{startDate}, '%Y-%m-%d')
+                                 AND STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s')
+        </if>
+        <if test="categoryId != 0">
+            AND p.category_id = #{categoryId}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (
+                p.title LIKE CONCAT('%', #{keyword}, '%')
+                OR p.writer LIKE CONCAT('%', #{keyword}, '%')
+                OR p.content LIKE CONCAT('%', #{keyword}, '%')
+            )
+        </if>
+    </sql>
+
+
+
+    <!--
+        게시물 총 갯수를 조회합니다.
+        · 매개변수 : PostFilterDTO(startDate, endDate, categoryId, keyword)
+        · 조건 : 날짜 범위 / 카테고리 필터 / 검색어 필터
+        · 반환데이터 : 게시물 총 갯수
+    -->
+    <select id="countAllPosts" parameterType="com.study.connection.dto.filter.PostFilterDTO" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM post p
+
+        <include refid="condition"/>
+
+    </select>
+
+
+
+    <!--
+        게시물 목록을 조회합니다. (게시물 p JOIN 카테고리 c, 파일 f)
+        · 매개변수 : PostFilterDTO(startDate, endDate, categoryId, keyword)
+        · 조건 : 날짜 범위 / 카테고리 필터 / 검색어 필터
+        · 반환데이터 : PostListDTO(postId, title, writer, views, categoryName, createdAt, updatedAt, fileExist)
+    -->
+    <select id="getFilteredPosts" parameterType="com.study.connection.dto.filter.PostFilterDTO" resultType="com.study.connection.dto.post.PostListDTO">
+        SELECT p.post_id AS postId, p.title AS title, p.writer AS writer, p.views AS views, c.category_name AS categoryName,
+            DATE_FORMAT(p.created_at, '%Y-%m-%d %H:%i') AS createdAt,
+            DATE_FORMAT(p.updated_at, '%Y-%m-%d %H:%i') AS updatedAt,
+            (SELECT COUNT(*) > 0 FROM file f WHERE f.post_id = p.post_id) AS fileExist
+        FROM post p
+        JOIN category c ON p.category_id = c.category_id
+
+        <include refid="condition"/>
+
+        ORDER BY p.post_id DESC
+        LIMIT 10 OFFSET #{offset}
+    </select>
+
+
+
+    <!--
+        카테고리 목록을 조회합니다.
+        · 반환데이터 : CategoryDTO(postId, title, writer, views, categoryName, createdAt, updatedAt, fileExist)
+    -->
+    <select id="getCategoryList" resultType="com.study.connection.dto.filter.CategoryDTO">
+        SELECT category_id AS categoryId, category_name AS categoryName
+        FROM category
+    </select>
+
+
+
+    <!--
+        게시물 ID 를 조건으로 게시물 세부 내용을 조회합니다. (게시물 p JOIN 카테고리 c)
+        · 매개변수 : postId
+        · 조건 : 게시물 번호 일치
+        · 반환데이터 : PostArticleDTO(postId, title, writer, views, categoryName, createdAt, updatedAt)
+    -->
+    <select id="getPostDetails" parameterType="int" resultType="com.study.connection.dto.post.PostArticleDTO">
+        SELECT p.post_id AS postId, p.title AS title, p.content AS content, p.writer AS writer, p.views AS views, c.category_name AS categoryName,
+               DATE_FORMAT(p.created_at, '%Y-%m-%d %H:%i') AS createdAt,
+               DATE_FORMAT(p.updated_at, '%Y-%m-%d %H:%i') AS updatedAt
+        FROM post p
+        JOIN category c ON p.category_id = c.category_id
+        WHERE p.post_id= #{postId}
+    </select>
+
+
+
+    <!--
+        게시물 테이블(post) 에 데이터를 저장합니다.
+        useGeneratedKeys 를 통해 insert 한 데이터의 id 를 매개변수 dto 안에 자동 삽입합니다.
+        · 매개변수 : PostInsertDTO(categoryId, title, content, writer, bCryptPassword)
+    -->
+    <insert id="insertPost" parameterType="com.study.connection.dto.post.PostInsertDTO" useGeneratedKeys="true" keyProperty="postId">
+        INSERT INTO post (category_id, title, content, writer, password)
+        VALUES (#{categoryId}, #{title}, #{content}, #{writer}, #{bCryptPassword})
+    </insert>
+
+
+
+    <!--
+        첨부파일의 메타데이터를 파일 테이블(file) 에 저장합니다.
+        useGeneratedKeys 를 통해 insert 한 데이터의 id 를 매개변수 dto 안에 자동 삽입합니다.
+        · 매개변수 : FileInsertDTO(postId, fileName, fileSize, contentType, filePath)
+    -->
+    <insert id="insertFileMeta" parameterType="com.study.connection.dto.file.FileMetaInsertDTO">
+        INSERT INTO file (post_id, file_name, file_size, content_type, file_path)
+        VALUES (#{postId}, #{fileName}, #{fileSize}, #{contentType}, #{filePath})
+    </insert>
+
+
+
+    <!--
+        게시물 ID 를 조건으로 존재하는 파일의 메타데이터를 조회합니다.
+        · 매개변수 : postId
+        · 조건 : 게시물 번호 일치
+        · 반환데이터 : FileMetadataDTO(fileId, fileName, fileSize)
+    -->
+    <select id="getFileMeta" parameterType="int" resultType="com.study.connection.dto.file.FileMetadataDTO">
+        SELECT file_id AS fileId, file_name AS fileName, file_size AS fileSize
+        FROM file WHERE post_id = #{postId}
+    </select>
+
+
+
+    <!--
+        게시물 ID 를 조건으로 존재하는 파일의 ID 목록을 조회합니다.
+        postDAO.deleteSelectedFiles() 에 필요한 타입인 List<String> 으로 반환합니다. (원래는 int)
+        · 매개변수 : postId
+        · 조건 : 게시물 번호 일치
+        · 반환데이터 : fileId
+    -->
+    <select id="getFileIdList" parameterType="int" resultType="java.lang.String">
+        SELECT file_id AS fileId
+        FROM file WHERE post_id = #{postId}
+    </select>
+
+
+
+    <!--
+        파일 ID 를 조건으로 다운로드를 위한 데이터를 조회합니다.
+        · 매개변수 : fileId
+        · 조건 : 파일 번호 일치
+        · 반환데이터 : FileDownloadDTO(fileId, fileName, filePath, contentType)
+    -->
+    <select id="getFileDownloadData" parameterType="int" resultType="com.study.connection.dto.file.FileDownloadDTO">
+        SELECT file_id AS fileId, file_name AS fileName, file_path AS filePath, content_type AS contentType
+        FROM file WHERE file_id = #{fileId}
+    </select>
+
+
+
+    <!--
+        게시물 ID 를 조건으로 해당 게시물을 조회수(views) 에 1을 더합니다.
+        · 매개변수 : postId
+        · 조건 : 게시물 번호 일치
+    -->
+    <update id="addViews" parameterType="int">
+        UPDATE post SET views = views + 1 WHERE post_id = #{postId}
+    </update>
+
+
+
+    <!--
+        게시물 ID 를 조건으로 게시물의 비밀번호를 조회합니다.
+        · 매개변수 : postId
+        · 조건 : 게시물 번호 일치
+        · 반환데이터 : password
+    -->
+    <select id="getPostPassword" parameterType="int" resultType="java.lang.String">
+        SELECT password FROM post WHERE post_id = #{postId}
+    </select>
+
+
+
+    <!--
+        게시물 ID 를 조건으로 게시물 테이블(post) 에 수정된 데이터를 저장하고, 수정일자(updated_at)를 갱신합니다.
+        · 매개변수 : PostUpdateDTO(postId, categoryId, title, content, writer)
+        · 조건 : 게시물 번호 일치
+    -->
+    <update id="updatePost" parameterType="com.study.connection.dto.post.PostUpdateDTO">
+        UPDATE post
+        SET category_id = #{categoryId}, writer = #{writer}, title = #{title}, content = #{content}
+          , updated_at = CURRENT_TIMESTAMP
+        WHERE post_id = #{postId}
+    </update>
+
+
+
+    <!--
+        게시물 ID 를 조건으로 데이터를 삭제합니다.
+        단, 해당 게시물 ID 를 참조하는 file 과 comment 가 있을 경우 삭제가 제한되고 에러가 발생합니다.
+        · 매개변수 : postId
+        · 조건 : 게시물 번호 일치
+        // TODO RESTRICT 조건으로 인해 삭제 불가할 경우 발생하는 에러에 대한 처리 필요 - ERROR 1451 (23000): Cannot delete or update a parent row: a foreign key constraint fails (`database_name`.`child_table_name`, CONSTRAINT `fk_name` FOREIGN KEY (`column_name`) REFERENCES `parent_table_name` (`column_name`))
+    -->
+    <delete id="deletePost" parameterType="int">
+        DELETE FROM post WHERE post_id = #{postId}
+    </delete>
+
+
+
+    <!--
+        파일 ID 와 게시물 ID 를 조건으로 데이터를 삭제합니다.
+        · 매개변수 : FileMetaDeleteDTO(fileId, postId)
+        · 조건 : 게시물 번호 와 파일 번호 일치
+    -->
+    <delete id="deleteFile" parameterType="com.study.connection.dto.file.DeleteFileIdDTO">
+        DELETE FROM file WHERE file_id = #{fileId} AND post_id = #{postId}
+    </delete>
+
+
+
+    <!--   댓글 기능 제일 마지막 완성
+    <insert id="insertReply" parameterType="map">
+        INSERT INTO reply (post_id, reply_content) VALUES (#{postId}, #{replyContent})
+    </insert>
+
+    <select id="readReply" parameterType="int" resultType="com.study.connection.dto.comment.ReplyReadDTO">
+        SELECT reply_id AS replyId, reply_content AS replyContent, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') AS createdAt
+        FROM reply
+        WHERE post_id = #{postId}
+    </select>
+-->
+</mapper>

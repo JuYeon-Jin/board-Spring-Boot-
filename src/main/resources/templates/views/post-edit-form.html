@@ -20,9 +20,9 @@
         <div class="input-container">
             <select name="categoryId" id="category" class="category font14">
                 <option th:each="category : ${categories}"
-                        th:value="${category.id}"
-                        th:selected="${category.name == post.categoryName}"
-                        th:text="${category.name}"></option>
+                        th:value="${category.categoryId}"
+                        th:selected="${category.categoryName == post.categoryName}"
+                        th:text="${category.categoryName}"></option>
             </select>
         </div>
     </div>
