@@ -1,105 +1,59 @@
 package com.study.connection.dao;
 
-import com.study.connection.dto.file.FileInfoDTO;
+import com.study.connection.dto.file.*;
 import com.study.connection.dto.filter.CategoryDTO;
+import com.study.connection.dto.filter.PostFilterDTO;
 import com.study.connection.dto.post.PostArticleDTO;
 import com.study.connection.dto.post.PostInsertDTO;
 import com.study.connection.dto.post.PostListDTO;
 import com.study.connection.dto.post.PostUpdateDTO;
-import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
+/**
+ * 쿼리문은 XML 에 두고 인터페이스에는 메서드 시그니처만 유지
+ */
 public interface PostDAO {
 
-   @Select("SELECT p.id AS id, p.title AS title, " +
-           "DATE_FORMAT(p.created_at, '%Y-%m-%d %H:%i') AS createdAt, " +
-           "DATE_FORMAT(p.updated_at, '%Y-%m-%d %H:%i') AS updatedAt, " +
-           "p.writer AS writer, p.views AS views, c.name AS categoryName, " +
-           "(SELECT COUNT(*) > 0 FROM files f WHERE f.post_id = p.id) AS fileExist " +
-           "FROM posts p JOIN category c " +
-           "ON p.category_id = c.id " +
-           "WHERE p.is_deleted = false " +
-           "ORDER BY p.id DESC")
-   public List<PostListDTO> getPostList();
+   // 카테고리 목록을 조회합니다.
+   List<CategoryDTO> getCategoryList();
 
-   @Select("SELECT p.id AS id, p.title AS title, " +
-           "DATE_FORMAT(p.created_at, '%Y-%m-%d %H:%i') AS createdAt, " +
-           "DATE_FORMAT(p.updated_at, '%Y-%m-%d %H:%i') AS updatedAt, " +
-           "p.writer AS writer, p.views AS views, c.name AS categoryName, " +
-           "(SELECT COUNT(*) > 0 FROM files f WHERE f.post_id = p.id) AS fileExist " +
-           "FROM posts p JOIN category c " +
-           "ON p.category_id = c.id " +
-           "WHERE p.is_deleted = false " +
-           "AND p.created_at BETWEEN STR_TO_DATE(#{startDate}, '%Y-%m-%d') AND STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s') " +
-           "AND (p.title LIKE CONCAT('%', #{keyword}, '%') " +
-           "OR p.writer LIKE CONCAT('%', #{keyword}, '%') " +
-           "OR p.content LIKE CONCAT('%', #{keyword}, '%')) " +
-           "ORDER BY p.id DESC")
-   public List<PostListDTO> searchPostsInAllCategories(@Param("startDate") String startDate
-                                                     , @Param("endDate") String endDate
-                                                     , @Param("keyword") String keyword);
+   // 게시물 목록을 조회합니다. (게시물 p JOIN 카테고리 c, 파일 f)
+   List<PostListDTO> getFilteredPosts(PostFilterDTO filterDTO);
 
-   @Select("SELECT p.id AS id, p.title AS title, " +
-           "DATE_FORMAT(p.created_at, '%Y-%m-%d %H:%i') AS createdAt, " +
-           "DATE_FORMAT(p.updated_at, '%Y-%m-%d %H:%i') AS updatedAt, " +
-           "p.writer AS writer, p.views AS views, c.name AS categoryName, " +
-           "(SELECT COUNT(*) > 0 FROM files f WHERE f.post_id = p.id) AS fileExist " +
-           "FROM posts p JOIN category c " +
-           "ON p.category_id = c.id " +
-           "WHERE p.is_deleted = false " +
-           "AND p.created_at BETWEEN STR_TO_DATE(#{startDate}, '%Y-%m-%d') AND STR_TO_DATE(CONCAT(#{endDate}, ' 23:59:59'), '%Y-%m-%d %H:%i:%s') " +
-           "AND p.category_id = #{categoryId} " +
-           "AND (p.title LIKE CONCAT('%', #{keyword}, '%') " +
-           "OR p.writer LIKE CONCAT('%', #{keyword}, '%') " +
-           "OR p.content LIKE CONCAT('%', #{keyword}, '%')) " +
-           "ORDER BY p.id DESC")
-   public List<PostListDTO> searchPostsInCategory(@Param("startDate") String startDate
-                                                , @Param("endDate") String endDate
-                                                , @Param("categoryId") int categoryId
-                                                , @Param("keyword") String keyword);
+   // 게시물 전체 갯수를 조회합니다.
+   int countAllPosts(PostFilterDTO filterDTO);
 
-   @Select("SELECT id, name FROM category")
-   public List<CategoryDTO> getCategoryList();
+   // 게시물 ID를 조건으로 게시물 세부 내용을 조회합니다.
+   PostArticleDTO getPostDetails(int postId);
 
-   @Insert("INSERT INTO posts (category_id, title, content, writer, password)" +
-           " VALUES (#{dto.categoryId}, #{dto.title}, #{dto.content}, #{dto.writer}, #{dto.bCryptPassword})")
-   @Options(useGeneratedKeys = true, keyProperty = "id")
-   public void insertPost(@Param("dto") PostInsertDTO dto);
+   // 게시물 테이블(post)에 데이터를 저장합니다.
+   void insertPost(PostInsertDTO postInsertDTO);
 
-   @Insert("INSERT INTO files (post_id, file_name, file_size, content_type, data)" +
-           " VALUES (#{postId}, #{fileName}, #{fileSize}, #{contentType}, #{data})")
-   public void uploadFile(@Param("postId") int postId,
-                          @Param("fileName") String fileName,
-                          @Param("fileSize") long fileSize,
-                          @Param("contentType") String contentType,
-                          @Param("data") byte[] data);
+   // 첨부파일의 메타데이터를 파일 테이블(file)에 저장합니다.
+   void insertFileMeta(FileMetaInsertDTO fileMetaInsertDTO);
 
-   @Select("SELECT p.id AS postId, p.title AS title, p.content AS content," +
-                 " DATE_FORMAT(p.created_at, '%Y-%m-%d %H:%i') AS createdAt," +
-                 " DATE_FORMAT(p.updated_at, '%Y-%m-%d %H:%i') AS updatedAt," +
-                 " p.writer AS writer, p.views AS views, c.name AS categoryName" +
-           " FROM posts p JOIN category c" +
-                 " ON p.category_id = c.id" +
-           " WHERE p.id= #{postId}")
-   public PostArticleDTO readPost(@Param("postId") int postId);
+   // 게시물 ID를 조건으로 존재하는 파일의 메타데이터를 조회합니다.
+   List<FileMetadataDTO> getFileMeta(int postId);
 
-   @Update("UPDATE posts SET views = views + 1 WHERE id = #{postId}")
-   public void addViews(@Param("postId") int postId);
+   // 게시물 ID를 조건으로 존재하는 파일의 ID를 조회합니다.
+   List<String> getFileIdList(int postId);
 
-   @Select("SELECT id AS fileId, file_name AS fileName FROM files WHERE post_id = #{postId}")
-   public List<FileInfoDTO> readFile(@Param("postId") int postId);
+   // 파일 ID를 조건으로 다운로드를 위한 데이터를 조회합니다.
+   FileDownloadDTO getFileDownloadData(int fileId);
 
-   @Update("UPDATE posts" +
-           " SET category_id = #{dto.categoryId}, title = #{dto.title}, content = #{dto.content}, writer = #{dto.writer}, updated_at = CURRENT_TIMESTAMP" +
-           " WHERE id = #{dto.postId}")
-   public int updatePost(@Param("dto") PostUpdateDTO dto);
+   // 게시물 ID를 조건으로 해당 게시물을 조회수(views)에 1을 더합니다.
+   void addViews(int postId);
 
-   @Select("SELECT password FROM posts WHERE id = #{postId}")
-   public String passwordFromDatabase(@Param("postId") int postId);
+   // 게시물 ID를 조건으로 게시물의 비밀번호를 조회합니다.
+   String getPostPassword(int postId);
 
-   @Delete("DELETE FROM files WHERE id = #{fileId} AND post_id = #{postId}")
-   public void deleteFile(@Param("fileId") int fileId, @Param("postId") int postId);
+   // 게시물 ID를 조건으로 게시물 테이블(post)에 수정된 데이터를 저장하고, 수정일자(updated_at)를 갱신합니다.
+   void updatePost(PostUpdateDTO postUpdateDTO);
 
+   // 게시물 ID를 조건으로 데이터를 삭제합니다.
+   void deletePost(int postId);
 
+   // 파일 ID와 게시물 ID를 조건으로 데이터를 삭제합니다.
+   void deleteFile(FileMetaDeleteDTO fileMetaDeleteDTO);
 }

@@ -9,10 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class FileDownloadDTO {
+public class FileMetaDeleteDTO {
     private int fileId;
-    private String fileName;
-    private String filePath;
-    private String contentType;
+    private int postId;
 }
 // TODO 수정한 DTO

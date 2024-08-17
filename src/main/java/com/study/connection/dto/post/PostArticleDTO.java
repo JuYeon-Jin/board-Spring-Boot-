@@ -13,9 +13,9 @@ public class PostArticleDTO {
     private int postId;
     private String title;
     private String content;
-    private String createdAt;
-    private String updatedAt;
     private String writer;
     private int views;
     private String categoryName;
+    private String createdAt;
+    private String updatedAt;
 }

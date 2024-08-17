@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CategoryDTO {
-    int id;
-    String name;
+    int categoryId;
+    String categoryName;
 }
+// TODO 수정한 DTO

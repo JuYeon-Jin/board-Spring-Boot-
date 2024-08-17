@@ -10,11 +10,12 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostInsertDTO {
-    private int id;
+    private int postId;
     private int categoryId;
+    private String title;
+    private String content;
     private String writer;
     private String password;
     private String bCryptPassword;
-    private String title;
-    private String content;
 }
+// TODO 수정한 DTO

@@ -92,6 +92,11 @@
 }
 
 /* ================== 게시물 영역 ================== */
+.emptyList {
+    text-align: center;
+    margin: 25px 0 15px 0;
+}
+
 .tableLine1 {
     height: 1px;
     background-color: black;
